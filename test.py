@@ -12,64 +12,17 @@ warnings.filterwarnings('ignore')
 # 1. CHARGEMENT ET NETTOYAGE DES DONNÉES
 class DataLoader:
  
-    def __init__(self, data_path: str = None):
+    def __init__(self, data_path: str = None, start_date: datetime = None, end_date: datetime = None):
         self.data_path = data_path
+        self.start_date = start_date
+        self.end_date = end_date
         
-    def load_factor_data(self, weighting_scheme: str = 'CW') -> Tuple[pd.DataFrame, pd.Series]:
+    def load_factor_data(self) -> pd.DataFrame:
+        df = pd.read_csv(self.data_path)
+        df['Date'] = pd.to_datetime(df['Date'])
+        df = df[(df['Date'] >= self.start_date) & (df['Date'] <= self.end_date)]
 
-        # Exemple avec données simulées (remplacer par vos vraies données)
-        np.random.seed(42)
-        n_periods = 600
-        n_factors = 153  # Comme dans l'article
-        
-        # Dates
-        dates = pd.date_range('1971-11-01', periods=n_periods, freq='M')
-        
-        # Rendements du marché
-        market_return = pd.Series(
-            np.random.normal(0.01, 0.04, n_periods),
-            index=dates,
-            name='market'
-        )
-        
-        # Créer des facteurs avec différentes caractéristiques
-        factors_data = {}
-        
-        # Facteurs avec de vrais alphas (environ 15 selon l'article)
-        for i in range(15):
-            alpha = np.random.normal(0.003, 0.001) * (15 - i) / 15
-            beta = np.random.uniform(0.5, 1.5)
-            
-            if weighting_scheme == 'EW':
-                # Les facteurs EW ont des alphas plus forts
-                alpha *= 1.5
-                noise = np.random.normal(0, 0.05, n_periods)
-            elif weighting_scheme == 'VW':
-                noise = np.random.normal(0, 0.04, n_periods)
-            else:  # CW
-                noise = np.random.normal(0, 0.035, n_periods)
-            
-            factor_return = alpha + beta * market_return + noise
-            factors_data[f'factor_{i+1}'] = factor_return
-        
-        # Facteurs sans alpha significatif
-        for i in range(15, n_factors):
-            beta = np.random.uniform(0.3, 1.2)
-            if weighting_scheme == 'EW':
-                noise = np.random.normal(0, 0.06, n_periods)
-            else:
-                noise = np.random.normal(0, 0.04, n_periods)
-            
-            factor_return = beta * market_return + noise
-            factors_data[f'factor_{i+1}'] = factor_return
-        
-        factors_df = pd.DataFrame(factors_data, index=dates)
-        
-        # Nettoyer les données (supprimer les NaN)
-        factors_df = factors_df.dropna()
-        market_return = market_return[factors_df.index]
-        
-        return factors_df, market_return
+        return df
 
 
 # 2. TEST GRS

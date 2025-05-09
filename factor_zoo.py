@@ -62,7 +62,6 @@ class GRSTest:
 
 
 class IterativeFactorSelection:
-    """Sélection itérative des facteurs en utilisant la régression OLS."""
     
     def __init__(self, factors_df, market_return, significance_threshold=3.0):
         self.factors_df = factors_df
@@ -71,6 +70,7 @@ class IterativeFactorSelection:
         self.results = []
         
     def run_regression(self, y, X):
+        """Effectue une régression OLS et retourne les résultats."""
         X_with_const = sm.add_constant(X)
         model = sm.OLS(y, X_with_const, missing='drop')
         res = model.fit()
@@ -82,47 +82,144 @@ class IterativeFactorSelection:
             'residuals': res.resid
         }
     
+    def calculate_grs(self, alphas, residuals, factors):
+        """Calcule la statistique GRS."""
+        try:
+            T, N = residuals.shape
+            K = factors.shape[1] if factors.ndim > 1 else 1
+            
+            # S'assurer que alphas est un vecteur colonne
+            alphas = np.array(alphas).reshape(-1, 1)
+            
+            # Matrices de covariance
+            Sigma = np.cov(residuals.T, bias=False)
+            
+            # Gérer le cas où factors est 1D
+            if factors.ndim == 1:
+                factors = factors.reshape(-1, 1)
+            
+            Omega = np.cov(factors.T, bias=False)
+            if Omega.ndim == 0:
+                Omega = np.array([[Omega]])
+            elif Omega.ndim == 1:
+                Omega = Omega.reshape(1, 1)
+            
+            # Moyenne des facteurs
+            f_bar = np.mean(factors, axis=0).reshape(-1, 1)
+            
+            # Ratios de Sharpe au carré
+            Sh2_alpha = float(alphas.T @ inv(Sigma) @ alphas)
+            Sh2_f = float(f_bar.T @ inv(Omega) @ f_bar)
+            
+            # Statistique GRS
+            grs_stat = ((T - N - K) / N) * (Sh2_alpha / (1 + Sh2_f))
+            
+            # p-value
+            p_value = 1 - f.cdf(grs_stat, N, T - N - K)
+            
+            return grs_stat, p_value, Sh2_f
+            
+        except:
+            return np.nan, np.nan, np.nan
+    
     def select_factors(self, max_factors=30):
+        """Sélection itérative des facteurs."""
         
         available_factors = list(self.factors_df.columns)
         selected_factors = []
         results = []
         
+        # Créer une copie pour la normalisation si nécessaire
+        factors_normalized = self.factors_df.copy()
+        market_normalized = self.market_return.copy()
+        
+        # Vérifier et normaliser les données si nécessaire
+        if abs(market_normalized.mean()) > 0.05:
+            print("Détection de données en pourcentage - conversion en décimal")
+            factors_normalized = factors_normalized / 100
+            market_normalized = market_normalized / 100
+        
         for iteration in range(max_factors):
+            print(f"\n--- Itération {iteration + 1} ---")
+            
             best_factor = None
             best_t_stat = 0
+            best_alpha = 0
             
-            # Facteurs de base (CAPM + facteurs déjà sélectionnés)
-            X_base = pd.concat([self.market_return.to_frame()] + 
-                             [self.factors_df[f] for f in selected_factors], axis=1)
+            # Construire le modèle de base
+            if iteration == 0:
+                # Premier passage : juste le marché
+                X_base = market_normalized.to_frame('market')
+            else:
+                # Passes suivants : marché + facteurs sélectionnés
+                X_base = pd.concat([market_normalized.to_frame('market')] + 
+                                 [factors_normalized[f] for f in selected_factors], axis=1)
             
             # Tester chaque facteur disponible
+            factor_results = {}
+            
+            print(f"Test de {len(available_factors)} facteurs disponibles...")
+            
             for factor in available_factors:
-                reg_results = self.run_regression(self.factors_df[factor], X_base)
+                y = factors_normalized[factor]
                 
-                # Sélectionner le facteur avec le plus grand t-stat en valeur absolue
+                # Aligner les données
+                valid_idx = ~(y.isna() | X_base.isna().any(axis=1))
+                
+                if valid_idx.sum() < 50:  # Au moins 50 observations
+                    continue
+                
+                reg_results = self.run_regression(y[valid_idx], X_base[valid_idx])
+                
+                factor_results[factor] = {
+                    'alpha': reg_results['alpha'],
+                    't_stat': reg_results['t_stat'],
+                    'abs_t_stat': abs(reg_results['t_stat'])
+                }
+                
+                # Sélectionner le facteur avec le plus grand |t-stat|
                 if abs(reg_results['t_stat']) > abs(best_t_stat):
                     best_factor = factor
                     best_t_stat = reg_results['t_stat']
+                    best_alpha = reg_results['alpha']
+            
+            # Afficher les top 5 facteurs pour cette itération
+            sorted_factors = sorted(factor_results.items(), 
+                                  key=lambda x: x[1]['abs_t_stat'], 
+                                  reverse=True)
+            
+            print(f"\nTop 5 facteurs (itération {iteration + 1}):")
+            for i, (fac, res) in enumerate(sorted_factors[:5]):
+                print(f"  {i+1}. {fac:<20} alpha: {res['alpha']:8.4f}, t-stat: {res['t_stat']:8.2f}")
             
             if best_factor is None:
+                print("Aucun facteur sélectionné - arrêt")
                 break
-                
+            
             # Ajouter le meilleur facteur
             selected_factors.append(best_factor)
             available_factors.remove(best_factor)
             
-            # Calculer les statistiques pour les facteurs restants
+            print(f"\nFacteur sélectionné: {best_factor} (t-stat: {best_t_stat:.3f})")
+            
+            # Calculer les statistiques pour ce modèle
+            X_current = pd.concat([market_normalized.to_frame('market')] + 
+                                [factors_normalized[f] for f in selected_factors], axis=1)
+            
+            # Statistiques des facteurs restants
             if available_factors:
-                X_current = pd.concat([self.market_return.to_frame()] + 
-                                    [self.factors_df[f] for f in selected_factors], axis=1)
-                
                 alphas = []
                 residuals_list = []
                 t_stats = []
                 
                 for factor in available_factors:
-                    reg_results = self.run_regression(self.factors_df[factor], X_current)
+                    y = factors_normalized[factor]
+                    valid_idx = ~(y.isna() | X_current.isna().any(axis=1))
+                    
+                    if valid_idx.sum() < 50:
+                        continue
+                    
+                    reg_results = self.run_regression(y[valid_idx], X_current[valid_idx])
                     alphas.append(reg_results['alpha'])
                     residuals_list.append(reg_results['residuals'])
                     t_stats.append(reg_results['t_stat'])
@@ -133,21 +230,18 @@ class IterativeFactorSelection:
                 
                 # Calculer GRS
                 if len(alphas) > 0 and len(residuals_list) > 0:
-                    try:
-                        # Assurer que tous les résidus ont la même longueur
-                        min_length = min(len(res) for res in residuals_list)
-                        residuals_array = np.column_stack([res[:min_length] for res in residuals_list])
-                        
-                        # Adapter les facteurs à la même longueur
-                        factors_array = X_current.values[:min_length, 1:] if X_current.shape[1] > 1 else np.zeros((min_length, 0))
-                        
-                        grs_stat, grs_pval, sh2_f = GRSTest.calculate_grs(
-                            np.array(alphas), residuals_array, factors_array
-                        )
-                        avg_abs_alpha = np.mean(np.abs(alphas))
-                    except:
-                        grs_stat, grs_pval, sh2_f = np.nan, np.nan, np.nan
-                        avg_abs_alpha = np.mean(np.abs(alphas))
+                    # S'assurer que tous les résidus ont la même longueur
+                    min_length = min(len(res) for res in residuals_list)
+                    residuals_array = np.column_stack([res[:min_length] for res in residuals_list])
+                    
+                    # Facteurs pour GRS (sans la constante)
+                    factors_array = X_current.iloc[:min_length, 1:].values
+                    
+                    grs_stat, grs_pval, sh2_f = self.calculate_grs(
+                        np.array(alphas), residuals_array, factors_array
+                    )
+                    
+                    avg_abs_alpha = np.mean(np.abs(alphas))
                 else:
                     grs_stat, grs_pval, sh2_f = np.nan, np.nan, np.nan
                     avg_abs_alpha = 0
@@ -156,28 +250,127 @@ class IterativeFactorSelection:
                 grs_stat, grs_pval, sh2_f = np.nan, np.nan, np.nan
                 avg_abs_alpha = 0
             
+            # Calculer le Sharpe ratio
+            if X_current.shape[1] > 1:
+                # Calculer rendements moyens et Sharpe ratio
+                factor_returns = X_current.iloc[:, 1:].mean()
+                factor_std = X_current.iloc[:, 1:].std()
+                sharpe_ratio = (factor_returns.mean() / factor_std.mean()) * np.sqrt(12)  # Annualisé
+            else:
+                sharpe_ratio = 0
+            
             # Stocker les résultats
             results.append({
                 'iteration': iteration + 1,
                 'factor': best_factor,
+                'alpha': best_alpha,
                 't_stat': best_t_stat,
                 'n_significant_t2': n_significant_t2,
                 'n_significant_t3': n_significant_t3,
                 'grs_statistic': grs_stat,
                 'grs_pvalue': grs_pval,
-                'avg_abs_alpha': avg_abs_alpha,
-                'sh2_f': sh2_f
+                'avg_abs_alpha': avg_abs_alpha * 12 * 100,  # Annualisé en %
+                'sh2_f': sh2_f,
+                'sr': sharpe_ratio
             })
+            
+            print(f"Facteurs significatifs restants (t > 3): {n_significant_t3}")
+            print(f"GRS statistic: {grs_stat:.3f}, p-value: {grs_pval:.3f}")
             
             # Arrêter si plus de facteurs significatifs
             if n_significant_t3 == 0:
-                print(f"Arrêt à l'itération {iteration+1}: Plus de facteurs significatifs avec t > 3.0")
+                print(f"\nArrêt à l'itération {iteration+1}: Plus de facteurs significatifs avec t > 3.0")
                 break
         
         self.results = pd.DataFrame(results)
+        
+        # Formater les colonnes pour correspondre à l'article
+        self.results['GRS'] = self.results['grs_statistic'].round(2)
+        self.results['p(GRS)'] = self.results['grs_pvalue'].round(2)
+        self.results['Avg|α|'] = self.results['avg_abs_alpha'].round(2)
+        self.results['Sh²(f)'] = self.results['sh2_f'].round(2)
+        self.results['SR'] = self.results['sr'].round(2)
+        
         return self.results
 
+# Test de diagnostic pour vérifier les données
+def diagnostic_check(factors_df, market_return):
+    """Vérifie les données et suggère des corrections."""
+    
+    print("DIAGNOSTIC DES DONNÉES")
+    print("=" * 50)
+    
+    # Vérifier le marché
+    print(f"Marché - Moyenne: {market_return.mean():.6f}")
+    print(f"Marché - Écart-type: {market_return.std():.6f}")
+    
+    # Vérifier quelques facteurs clés
+    key_factors = ['cop_at', 'noa_gr1a', 'saleq_gr1', 'ival_me', 'resff3_12_1']
+    
+    for factor in key_factors:
+        if factor in factors_df.columns:
+            print(f"\n{factor}:")
+            print(f"  Moyenne: {factors_df[factor].mean():.6f}")
+            print(f"  Écart-type: {factors_df[factor].std():.6f}")
+            
+            # Test de régression simple
+            y = factors_df[factor]
+            X = sm.add_constant(market_return)
+            valid_idx = ~(y.isna() | market_return.isna())
+            
+            model = sm.OLS(y[valid_idx], X[valid_idx])
+            results = model.fit()
+            
+            print(f"  Alpha CAPM: {results.params[0]:.6f}")
+            print(f"  t-stat: {results.tvalues[0]:.3f}")
+            print(f"  Alpha annualisé: {results.params[0] * 12 * 100:.2f}%")
+    
+    # Recommandation
+    if abs(market_return.mean()) > 0.05:
+        print("\n⚠️ Les données semblent être en pourcentage!")
+        print("Recommandation: Diviser par 100 avant analyse")
+    else:
+        print("\n✓ Les données semblent être en décimal")
+    
+    return {
+        'market_mean': market_return.mean(),
+        'market_std': market_return.std(),
+        'likely_percentage': abs(market_return.mean()) > 0.05
+    }
 
+# Fonction pour créer une comparaison directe avec l'article
+def create_exhibit_comparison(your_results, formatted=True):
+    """Crée un tableau comparable à l'Exhibit 2 de l'article."""
+    
+    # Structure similaire à l'article
+    exhibit = pd.DataFrame()
+    
+    exhibit['No.'] = your_results['iteration']
+    exhibit['Factor'] = your_results['factor']
+    
+    # Clusters (vous devez les mapper)
+    from clusters import create_factor_clusters
+    get_cluster = create_factor_clusters()
+    exhibit['Cluster'] = your_results['factor'].apply(get_cluster)
+    
+    # Statistiques
+    exhibit['GRS'] = your_results['grs_statistic'].round(2)
+    exhibit['p(GRS)'] = your_results['grs_pvalue'].round(3)
+    exhibit['Avg|α|'] = your_results['avg_abs_alpha'].round(2)
+    exhibit['Sh²(f)'] = your_results['sh2_f'].round(2)
+    exhibit['SR'] = your_results['sr'].round(2)
+    exhibit['t > 2'] = your_results['n_significant_t2']
+    exhibit['t > 3'] = your_results['n_significant_t3']
+    
+    if formatted:
+        # Formater comme dans l'article
+        exhibit['GRS'] = exhibit['GRS'].map('{:.2f}'.format)
+        exhibit['p(GRS)'] = exhibit['p(GRS)'].map('{:.2f}'.format)
+        exhibit['Avg|α|'] = exhibit['Avg|α|'].map('{:.2f}'.format)
+        exhibit['Sh²(f)'] = exhibit['Sh²(f)'].map('{:.2f}'.format)
+        exhibit['SR'] = exhibit['SR'].map('{:.2f}'.format)
+    
+    return exhibit
 class FactorZooPlotter:
     """Visualisation des résultats de la sélection des facteurs."""
     

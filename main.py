@@ -21,15 +21,19 @@ def main(weighting_schemes : list):
         print(f"\nTraitement du schéma de pondération: {scheme}")
         
         # Charger les données
-        data_loader = DataLoader(scheme, '1993-08-01', '2021-12-31')
-        factors_df, market_return = data_loader.load_factor_data('ex US')
-        
-        # Stocker pour utilisation ultérieure
+        start_date = '1993-08-01'
+        end_date = '2021-12-31'
+        #data_loader = DataLoader(scheme, '1993-08-01', '2021-12-31')
+        #data_loader = DataLoader(scheme)
+        #factors_df, market_return = data_loader.load_factor_data('world')
+
+        '''# Stocker pour utilisation ultérieure
         factors_df_dict[scheme] = factors_df
-        market_return_dict[scheme] = market_return
+        market_return_dict[scheme] = market_return'''
         
         # Sélection itérative
-        selector = IterativeFactorSelection(factors_df, market_return)
+        selector = IterativeFactorSelection('VW_cap', start_date, end_date,
+                                            region_factors_X = 'world', region_factors_y = 'US')
         results = selector.select_factors()
         results_dict[scheme] = results
         

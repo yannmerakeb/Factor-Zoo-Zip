@@ -9,7 +9,7 @@ warnings.filterwarnings('ignore')
 
 class DataLoader:
     """Chargement et nettoyage des données de facteurs."""
-    def __init__(self, weighting, start_date="1971-11-30", end_date="2021-12-31"):
+    def __init__(self, weighting, start_date="1971-11-01", end_date="2021-12-31"):
         self.data_path = f'data/{weighting}.csv'
         self.start_date = pd.to_datetime(start_date)
         self.end_date = pd.to_datetime(end_date)
@@ -23,17 +23,24 @@ class DataLoader:
         df = df[(df['date'] >= self.start_date) & (df['date'] <= self.end_date)]
 
         if region == 'US':
-            df = df[df['location'] == 'US']
+            df = df[df['location'] == 'usa']
         elif region == 'ex US':
-            df = df[df['location'] != 'US']
+            df = df[df['location'] != 'usa']
 
-        # Pivot et extraction du marché
-        # à modifier pour plusieurs régions
-        pivot_df = df.pivot(index='date', columns='name', values='ret')
+        # Pondération des facteurs par le nombre de stocks
+        if region in ['ex US', 'world']:
+            df['weighted_ret'] = df['ret'] * df['n_stocks']
+            weighted_sum = df.groupby(['date', 'name'])['weighted_ret'].sum()
+            stock_count = df.groupby(['date', 'name'])['n_stocks'].sum()
+            pivot_df = (weighted_sum / stock_count).unstack()
+
+        else:
+            pivot_df = df.pivot(index='date', columns='name', values='ret')
+
         market_return = pivot_df['market_equity']
         factors_df = pivot_df.drop(columns=['market_equity'])
-        
-        print(f"Données chargées: {len(factors_df)} périodes, {factors_df.shape[1]} facteurs")
+
+        print(f"Données chargées: {len(factors_df)} périodes (mois), {factors_df.shape[1]} facteurs")
         return factors_df, market_return
 
 
@@ -377,6 +384,7 @@ def create_exhibit_comparison(your_results, formatted=True):
         exhibit['SR'] = exhibit['SR'].map('{:.2f}'.format)
     
     return exhibit
+
 class FactorZooPlotter:
     """Visualisation des résultats de la sélection des facteurs."""
     

@@ -5,7 +5,7 @@ warnings.filterwarnings('ignore')
 from factor_zoo import FactorZooPlotter, DataLoader, IterativeFactorSelection
 from clusters import create_factor_clusters
 
-def main(data_paths : dict, weighting_schemes : list):
+def main(weighting_schemes : list):
 
     results_dict = {}
 
@@ -19,12 +19,10 @@ def main(data_paths : dict, weighting_schemes : list):
     
     for scheme in weighting_schemes:
         print(f"\nTraitement du schéma de pondération: {scheme}")
-        data_path = data_paths[scheme]
-        print(f"Utilisation du fichier: {data_path}")
         
         # Charger les données
-        data_loader = DataLoader(data_path)
-        factors_df, market_return = data_loader.load_factor_data()
+        data_loader = DataLoader(scheme)
+        factors_df, market_return = data_loader.load_factor_data('US')
         
         # Stocker pour utilisation ultérieure
         factors_df_dict[scheme] = factors_df
@@ -70,11 +68,5 @@ def main(data_paths : dict, weighting_schemes : list):
 
 if __name__ == "__main__":
     
-    data_paths = {
-        'VW Cap': "data/[usa]_[all_factors]_[monthly]_[vw_cap].csv",
-        'EW': "data/[usa]_[all_factors]_[monthly]_[ew].csv",
-        'VW': "data/[usa]_[all_factors]_[monthly]_[vw].csv"
-    }
-    
     # Exécuter l'analyse pour tous les schémas
-    results_dict, summary_df, factor_table = main(data_paths, ['VW Cap', 'EW', 'VW'])
+    results_dict, summary_df, factor_table = main(data_paths, ['VW_cap', 'EW', 'VW'])

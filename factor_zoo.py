@@ -9,12 +9,12 @@ warnings.filterwarnings('ignore')
 
 class DataLoader:
     """Chargement et nettoyage des données de facteurs."""
-    def __init__(self, data_path, start_date="1971-11-30", end_date="2021-12-31"):
-        self.data_path = data_path
+    def __init__(self, weighting, start_date="1971-11-30", end_date="2021-12-31"):
+        self.data_path = f'data/{weighting}.csv'
         self.start_date = pd.to_datetime(start_date)
         self.end_date = pd.to_datetime(end_date)
         
-    def load_factor_data(self):
+    def load_factor_data(self, region = 'world'):
         """Charge les données des facteurs et extrait le rendement du marché."""
         print(f"Chargement des données depuis {self.data_path}")
         
@@ -22,7 +22,13 @@ class DataLoader:
         df['date'] = pd.to_datetime(df['date'])
         df = df[(df['date'] >= self.start_date) & (df['date'] <= self.end_date)]
 
+        if region == 'US':
+            df = df[df['location'] == 'US']
+        elif region == 'ex US':
+            df = df[df['location'] != 'US']
+
         # Pivot et extraction du marché
+        # à modifier pour plusieurs régions
         pivot_df = df.pivot(index='date', columns='name', values='ret')
         market_return = pivot_df['market_equity']
         factors_df = pivot_df.drop(columns=['market_equity'])

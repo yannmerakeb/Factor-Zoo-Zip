@@ -21,8 +21,8 @@ def main(weighting_schemes : list):
         print(f"\nTraitement du schéma de pondération: {scheme}")
         
         # Charger les données
-        data_loader = DataLoader(scheme)
-        factors_df, market_return = data_loader.load_factor_data('US')
+        data_loader = DataLoader(scheme, '1993-08-01', '2021-12-31')
+        factors_df, market_return = data_loader.load_factor_data('ex US')
         
         # Stocker pour utilisation ultérieure
         factors_df_dict[scheme] = factors_df
@@ -69,4 +69,4 @@ def main(weighting_schemes : list):
 if __name__ == "__main__":
     
     # Exécuter l'analyse pour tous les schémas
-    results_dict, summary_df, factor_table = main(data_paths, ['VW_cap', 'EW', 'VW'])
+    results_dict, summary_df, factor_table = main(['VW_cap', 'EW', 'VW'])

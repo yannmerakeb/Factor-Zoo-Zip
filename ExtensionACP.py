@@ -616,19 +616,3 @@ def run_pca_extension(factors_df, market_return=None, n_components=10):
         'evaluation_results': evaluation_results,
         'pca_object': pca_extension
     }
-
-# Exemple d'utilisation
-if __name__ == "__main__":
-    from factor_zoo import DataLoader
-    
-    # Charger les données
-    data_path = "data/[usa]_[all_factors]_[monthly]_[vw_cap].csv"
-    dl = DataLoader(data_path)
-    factors_df, market_ret = dl.load_factor_data()
-    
-    # Convertir en décimal si nécessaire
-    factors_df = factors_df / 100
-    market_ret = market_ret / 100
-    
-    # Exécuter l'extension ACP
-    pca_results = run_pca_extension(factors_df, market_ret, n_components=10)

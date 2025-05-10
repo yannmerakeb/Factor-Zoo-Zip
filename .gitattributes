@@ -1,2 +1,5 @@
 *.csv filter=lfs diff=lfs merge=lfs -text
 data/*.csv filter=lfs diff=lfs merge=lfs -text
+EW.csv filter=lfs diff=lfs merge=lfs -text
+VW.csv filter=lfs diff=lfs merge=lfs -text
+VW_cap.csv filter=lfs diff=lfs merge=lfs -text

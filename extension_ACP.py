@@ -8,6 +8,9 @@ import statsmodels.api as sm
 from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
 import seaborn as sns
 from matplotlib.gridspec import GridSpec
+from sklearn.decomposition import FactorAnalysis
+from factor_analyzer import Rotator
+
 
 from data_loader import DataLoader
 
@@ -111,7 +114,49 @@ class PCAPurification:
         }
         
         return self.pca_results
-    
+    def run_factor_analysis_varimax(self, n_components=5):
+
+        if not hasattr(self, 'factors_scaled'):
+            self.preprocess_data()
+
+    # Analyse Factorielle
+        fa = FactorAnalysis(n_components=n_components)
+        factors_fa = fa.fit_transform(self.factors_scaled)
+
+    # Rotation Varimax
+        rotator = Rotator(method='varimax')
+        loadings_rotated = rotator.fit_transform(fa.components_.T)
+
+    # Composantes rotées
+        self.principal_factors = pd.DataFrame(
+            factors_fa,
+            index=self.factors_scaled.index,
+            columns=[f'Factor{i+1}' for i in range(n_components)]
+        )
+
+    # Stocker les loadings rotés
+        self.loadings = pd.DataFrame(
+            loadings_rotated,
+            index=self.factors_scaled.columns,
+            columns=[f'Factor{i+1}' for i in range(n_components)]
+        )
+
+    # Calcul de la variance expliquée approximative
+        explained_var = np.var(factors_fa, axis=0)
+        self.explained_variance = explained_var / np.sum(explained_var)
+        self.cum_explained_variance = np.cumsum(self.explained_variance)
+
+        print(f"Analyse factorielle Varimax réalisée avec {n_components} facteurs")
+        print(f"Variance expliquée totale: {self.cum_explained_variance[-1]:.4f}")
+
+        return {
+            'n_components': n_components,
+            'explained_variance_ratio': self.explained_variance,
+            'cum_explained_variance': self.cum_explained_variance,
+            'loadings': self.loadings,
+            'principal_factors': self.principal_factors
+        }
+
     def purify_factors(self, n_components=5):
         """
         Purifier les facteurs originaux en retirant les expositions communes.

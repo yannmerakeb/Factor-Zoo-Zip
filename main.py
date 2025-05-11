@@ -2,10 +2,11 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
 
-from factor_zoo import FactorZooPlotter, DataLoader, IterativeFactorSelection
+from factor_selection import IterativeFactorSelection
 from clusters import create_factor_clusters
+from visualisation import FactorZooPlotter
 
-def main(weighting_schemes : list):
+def main(weighting_schemes : list, start_date : str, end_date : str):
 
     results_dict = {}
 
@@ -20,21 +21,18 @@ def main(weighting_schemes : list):
     for scheme in weighting_schemes:
         print(f"\nTraitement du schéma de pondération: {scheme}")
         
-        # Charger les données
-        start_date = '1993-08-01'
-        end_date = '2021-12-31'
-        #data_loader = DataLoader(scheme, '1993-08-01', '2021-12-31')
-        #data_loader = DataLoader(scheme)
-        #factors_df, market_return = data_loader.load_factor_data('world')
-
         '''# Stocker pour utilisation ultérieure
         factors_df_dict[scheme] = factors_df
         market_return_dict[scheme] = market_return'''
         
         # Sélection itérative
-        selector = IterativeFactorSelection('VW_cap', start_date, end_date,
-                                            region_factors_X = 'world', region_factors_y = 'US')
-        results = selector.select_factors()
+        selector = IterativeFactorSelection(scheme, 
+                                            start_date, 
+                                            end_date,
+                                            region_factors_X = 'world', 
+                                            region_factors_y = 'US')
+        
+        results = selector.select_factors_t_std()
         results_dict[scheme] = results
         
         # Stocker les facteurs sélectionnés
@@ -73,4 +71,6 @@ def main(weighting_schemes : list):
 if __name__ == "__main__":
     
     # Exécuter l'analyse pour tous les schémas
-    results_dict, summary_df, factor_table = main(['VW_cap', 'EW', 'VW'])
+    results_dict, summary_df, factor_table = main(weighting_schemes=['VW_cap', 'EW', 'VW'],
+                                                  start_date='1993-08-01', 
+                                                  end_date='2021-12-31')

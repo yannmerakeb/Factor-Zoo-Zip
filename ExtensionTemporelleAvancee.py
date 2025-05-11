@@ -22,7 +22,7 @@ except ImportError:
     RUPTURES_AVAILABLE = False
     print("Warning: Ruptures not available. Install with: pip install ruptures")
 
-from factor_zoo import IterativeFactorSelection
+from factor_selection import IterativeFactorSelection
 
 class TemporalDynamicsAnalysis:
     """
@@ -64,7 +64,7 @@ class TemporalDynamicsAnalysis:
                 window_market,
                 significance_threshold=3.0
             )
-            selection = selector.select_factors(max_factors=15)
+            selection = selector.select_factors_t_std(max_factors=15)
             
             # Stocker les résultats
             window_result = {

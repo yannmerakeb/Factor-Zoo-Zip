@@ -1,5 +1,5 @@
 # run_temporal_extension.py
-from factor_zoo import DataLoader
+from data_loader import DataLoader
 from ExtensionTemporelleAvancee import run_temporal_analysis
 
 # Charger les données

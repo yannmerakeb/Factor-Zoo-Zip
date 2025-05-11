@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import os
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
@@ -7,6 +8,8 @@ import statsmodels.api as sm
 from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
 import seaborn as sns
 from matplotlib.gridspec import GridSpec
+
+from data_loader import DataLoader
 
 class PCAPurification:
     """
@@ -553,66 +556,57 @@ class PCAPurification:
                      fontsize=16, y=1.02)
         
         return results_df, fig
+    
+if __name__ == "__main__":
+    # Fermer toutes les figures matplotlib ouvertes
+    plt.close('all')
 
-# Fonction pour exécuter l'extension ACP
-def run_pca_extension(factors_df, market_return=None, n_components=10):
-    """
-    Exécute l'extension ACP complète sur les données des facteurs.
-    
-    Args:
-        factors_df (pd.DataFrame): DataFrame contenant les facteurs
-        market_return (pd.Series, optional): Série des rendements du marché
-        n_components (int): Nombre de composantes principales à extraire
-        
-    Returns:
-        dict: Résultats de l'analyse
-    """
-    print("\n=== Extension ACP du Factor Zoo ===\n")
-    
-    # Initialiser l'objet PCAPurification
-    pca_extension = PCAPurification(factors_df, market_return)
-    
-    # 1. Prétraiter les données
+    # Charger les données
+    data_loader = DataLoader('VW_cap', '1993-08-01', '2021-12-31')
+    factors_df, market_ret = data_loader.load_factor_data(region='world')
+
+    # Convertir en décimal si nécessaire
+    if abs(factors_df.mean().mean()) > 0.05:
+        print("Conversion des données de pourcentage en décimal")
+        factors_df = factors_df / 100
+        market_ret = market_ret / 100
+
+    # Initialiser et exécuter l'analyse PCA
+    pca_extension = PCAPurification(factors_df, market_ret)
+
+    # Étapes du PCA
     pca_extension.preprocess_data()
-    
-    # 2. Exécuter l'ACP
-    pca_results = pca_extension.run_pca(n_components=n_components)
-    
-    # 3. Créer des facteurs purifiés
-    purified_factors = pca_extension.purify_factors(n_components=n_components)
-    
-    # 4. Créer des clusters de facteurs
-    clusters, linkage_matrix = pca_extension.create_factor_clusters_hierarchical()
-    
-    # 5. Évaluer les facteurs purifiés vs originaux
-    evaluation_results, _ = pca_extension.evaluate_purified_factors(
-        market_return=market_return, 
-        n_components=n_components
-    )
-    
-    # 6. Créer des visualisations
-    scree_plot = pca_extension.plot_scree(n_components=20)
-    loadings_plot = pca_extension.plot_factor_loadings(n_components=5)
-    dendrogram_plot = pca_extension.plot_factor_dendrogram()
-    heatmap_original = pca_extension.plot_correlation_heatmap(purified=False)
-    heatmap_purified = pca_extension.plot_correlation_heatmap(purified=True)
-    comparison_plot = pca_extension.compare_original_vs_purified()
-    
-    # Sauvegarder les figures
-    scree_plot.savefig('pca_scree_plot.png')
-    loadings_plot.savefig('pca_loadings.png')
-    dendrogram_plot.savefig('factor_dendrogram.png')
-    heatmap_original.savefig('correlation_heatmap_original.png')
-    heatmap_purified.savefig('correlation_heatmap_purified.png')
-    comparison_plot.savefig('original_vs_purified_comparison.png')
-    
-    print("\n=== Analyse ACP terminée ===")
-    
-    # Retourner les résultats
-    return {
-        'pca_results': pca_results,
-        'purified_factors': purified_factors,
-        'factor_clusters': clusters,
-        'evaluation_results': evaluation_results,
-        'pca_object': pca_extension
+    pca_results = pca_extension.run_pca(n_components=10)
+
+    # Purifier les facteurs
+    purified_factors = pca_extension.purify_factors(n_components=10)
+
+    # Afficher les résultats
+    print("\nRésultats de l'ACP:")
+    print(f"Nombre de composantes: {pca_results['n_components']}")
+    print(f"Variance expliquée totale: {pca_results['cum_explained_variance'][-1]:.4f}")
+
+    # Créer un dossier pour les résultats
+    output_dir = "results_pca"
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Dictionnaire des figures à sauvegarder
+    figures_to_save = {
+        'scree_plot': pca_extension.plot_scree(n_components=10),
+        'loadings': pca_extension.plot_factor_loadings(n_components=5),
+        'dendrogram': pca_extension.plot_factor_dendrogram(),
+        'comparison': pca_extension.compare_original_vs_purified(),
     }
+
+    # Évaluation des facteurs purifiés
+    results_df, fig_eval = pca_extension.evaluate_purified_factors(market_return=market_ret)
+    figures_to_save['evaluation'] = fig_eval
+
+    # Sauvegarder toutes les figures
+    for name, fig in figures_to_save.items():
+        filename = os.path.join(output_dir, f'{name}.png')
+        fig.savefig(filename, dpi=300, bbox_inches='tight')
+        plt.close(fig)  # Fermer la figure pour libérer la mémoire
+        print(f"Sauvegardé: {filename}")
+
+    print(f"\nAnalyse PCA terminée! Tous les graphiques ont été sauvegardés dans '{output_dir}'.")

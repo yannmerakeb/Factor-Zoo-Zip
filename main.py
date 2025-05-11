@@ -2,11 +2,12 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
 
+from data_loader import DataLoader
 from factor_selection import IterativeFactorSelection
 from clusters import create_factor_clusters
 from visualisation import FactorZooPlotter
 
-def main(weighting_schemes : list, start_date : str, end_date : str, region_factors_X : str = 'world', region_factors_y : str = 'US'):
+def main(weighting_schemes : list):
 
     results_dict = {}
 
@@ -20,17 +21,17 @@ def main(weighting_schemes : list, start_date : str, end_date : str, region_fact
     
     for scheme in weighting_schemes:
         print(f"\nTraitement du schéma de pondération: {scheme}")
-        
-        '''# Stocker pour utilisation ultérieure
+
+        # Charger les données
+        data_loader = DataLoader(scheme, '1993-08-01', '2021-12-31')
+        factors_df, market_return = data_loader.load_factor_data('US')
+
+        # Stocker pour utilisation ultérieure
         factors_df_dict[scheme] = factors_df
-        market_return_dict[scheme] = market_return'''
+        market_return_dict[scheme] = market_return
         
         # Sélection itérative
-        selector = IterativeFactorSelection(scheme, 
-                                            start_date, 
-                                            end_date,
-                                            region_factors_X = region_factors_X, 
-                                            region_factors_y = region_factors_y)
+        selector = IterativeFactorSelection(factors_df, market_return)
         
         results = selector.select_factors_t_std()
         results_dict[scheme] = results
@@ -71,6 +72,4 @@ def main(weighting_schemes : list, start_date : str, end_date : str, region_fact
 if __name__ == "__main__":
     
     # Exécuter l'analyse pour tous les schémas
-    results_dict, summary_df, factor_table = main(weighting_schemes=['VW_cap', 'EW', 'VW'],
-                                                  start_date='1993-08-01', 
-                                                  end_date='2021-12-31')
+    results_dict, summary_df, factor_table = main(weighting_schemes=['VW_cap', 'EW', 'VW'])

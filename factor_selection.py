@@ -10,11 +10,9 @@ from data_loader import DataLoader
 
 class IterativeFactorSelection:
 
-    def __init__(self, weighting, start_date, end_date, region_factors_X, region_factors_y):
-
-        self.data_loader = DataLoader(weighting, start_date, end_date)
-        self.factors_X, self.market_return = self.data_loader.load_factor_data(region_factors_X)
-        self.factors_y, _ = self.data_loader.load_factor_data(region_factors_y)
+    def __init__(self, factors_df, market_return):
+        self.factors_df = factors_df
+        self.market_return = market_return
         self.results = []
         
     def run_regression(self, y, X):
@@ -73,14 +71,13 @@ class IterativeFactorSelection:
     def select_factors_t_std(self, max_factors=30):
         """Sélection itérative des facteurs avec loi de student."""
 
-        available_factors = list(self.factors_X.columns)
+        available_factors = list(self.factors_df.columns)
         selected_factors = []
         results = []
 
         # Créer une copie pour la normalisation si nécessaire
-        factors_X_normalized = self.factors_X.copy()
+        factors_normalized = self.factors_df.copy()
         market_normalized = self.market_return.copy()
-        factors_y_normalized = self.factors_y.copy()
 
         for iteration in range(max_factors):
             print(f"\n--- Itération {iteration + 1} ---")
@@ -96,7 +93,7 @@ class IterativeFactorSelection:
             else:
                 # Passes suivants : marché + facteurs sélectionnés
                 X_base = pd.concat([market_normalized.to_frame('market')] +
-                                   [factors_X_normalized[f] for f in selected_factors], axis=1)
+                                   [factors_normalized[f] for f in selected_factors], axis=1)
 
             # Tester chaque facteur disponible
             factor_results = {}
@@ -104,7 +101,7 @@ class IterativeFactorSelection:
             print(f"Test de {len(available_factors)} facteurs disponibles...")
 
             for factor in available_factors:
-                y = factors_y_normalized[factor]
+                y = factors_normalized[factor]
 
                 # Aligner les données
                 valid_idx = ~(y.isna() | X_base.isna().any(axis=1))
@@ -147,7 +144,7 @@ class IterativeFactorSelection:
 
             # Calculer les statistiques pour ce modèle
             X_current = pd.concat([market_normalized.to_frame('market')] +
-                                  [factors_X_normalized[f] for f in selected_factors], axis=1)
+                                  [factors_normalized[f] for f in selected_factors], axis=1)
 
             # Statistiques des facteurs restants
             if available_factors:
@@ -156,7 +153,7 @@ class IterativeFactorSelection:
                 t_stats = []
 
                 for factor in available_factors:
-                    y = factors_y_normalized[factor]
+                    y = factors_normalized[factor]
                     valid_idx = ~(y.isna() | X_current.isna().any(axis=1))
 
                     if valid_idx.sum() < 50:

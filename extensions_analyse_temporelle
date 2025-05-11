@@ -267,3 +267,47 @@ if __name__ == "__main__":
     print("\n" + "="*50)
     print("COMPARAISON DES PÉRIODES")
     print("="*50)
+
+    # Comparer la période de base avec l'agrégation des crises
+    if base_summary is not None and crisis_summary is not None:
+        print("\nComparaison entre la période de base et l'agrégation des crises:")
+        base_vs_all_crisis = compare_periods(base_summary, [crisis_summary])
+        print(base_vs_all_crisis)
+    
+    # Comparer la période de base avec les crises individuelles
+    if base_summary is not None and individual_summaries:
+        print("\nComparaison entre la période de base et les crises individuelles:")
+        base_vs_individual = compare_periods(base_summary, individual_summaries)
+        print(base_vs_individual)
+        
+        # Sauvegarder les résultats
+        base_vs_individual.to_csv('comparison_results.csv', index=False)
+        print("Résultats de comparaison sauvegardés dans 'comparison_results.csv'")
+    
+    # 5. Visualisation des comparaisons
+    if base_summary is not None and crisis_summary is not None:
+        try:
+            # Créer un graphique de comparaison des métriques Sharpe, Mean et Std
+            metrics = ['Sharpe', 'Mean', 'Std']
+            
+            fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+            
+            for i, metric in enumerate(metrics):
+                # Filtrer les données
+                plot_data = pd.concat([base_summary, crisis_summary])
+                
+                # Pivot pour faciliter la visualisation
+                pivot = plot_data.pivot(index='Period', columns='Weighting_scheme', values=metric)
+                
+                # Tracer
+                pivot.plot(kind='bar', ax=axes[i])
+                axes[i].set_title(f'Comparaison de {metric}')
+                axes[i].set_ylabel(metric)
+                axes[i].grid(True, linestyle='--', alpha=0.6)
+            
+            plt.tight_layout()
+            plt.savefig('crisis_comparison.png')
+            print("Graphique de comparaison sauvegardé dans 'crisis_comparison.png'")
+            plt.show()
+        except Exception as e:
+            print(f"Erreur lors de la création du graphique de comparaison: {e}")

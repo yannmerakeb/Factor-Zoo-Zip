@@ -1,0 +1,105 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from main import main
+
+def extension_base_data(schemes: list):
+    """Fonction pour exécuter l'analyse sur les données de bas de l'article."""
+    
+    results_dict, summary_df, factor_table = main(weighting_schemes=schemes, 
+                                                  start_date='1993-08-01', 
+                                                  end_date='2021-12-31')
+    
+    return results_dict, summary_df, factor_table
+
+def extension_latest_data(schemes : list):
+    """Fonction pour exécuter l'analyse sur les données les plus récentes."""
+
+    results_dict, summary_df, factor_table = main(weighting_schemes=schemes, start_date='1993-08-01', end_date='2024-12-31')
+
+    return results_dict, summary_df, factor_table
+
+def extension_crisis_data(schemes: list, crisis_name: str, start_date: str, end_date: str):
+    """Fonction pour exécuter l'analyse sur une période de crise spécifique."""
+    
+    results_dict, summary_df, factor_table = main(weighting_schemes=schemes, 
+                                                  start_date=start_date, 
+                                                  end_date=end_date)
+    
+    # Ajouter l'information sur la crise dans les DataFrames
+    summary_df['Crisis'] = crisis_name
+    
+    return results_dict, summary_df, factor_table
+
+def compare_periods(base_summary, crisis_summaries):
+    """Fonction pour comparer les périodes de base et les périodes de crise."""
+    
+    # Combiner toutes les données
+    all_data = pd.concat([base_summary] + crisis_summaries)
+    
+    # Afficher un résumé comparatif
+    print("Comparaison des performances entre la période de base et les périodes de crise:")
+    print(all_data)
+    
+    return all_data
+
+# Optionnel: Visualiser les comparaisons
+def plot_comparison(comparison_df, metric='Sharpe'):
+    """Fonction pour visualiser la comparaison des métriques entre les périodes."""
+    
+    plt.figure(figsize=(12, 6))
+    
+    # Créer un pivot pour faciliter la visualisation
+    pivot_df = comparison_df.pivot(index='Crisis', columns=None, values=metric)
+    
+    # Tracer les barres
+    pivot_df.plot(kind='bar')
+    
+    plt.title(f'Comparaison du {metric} pour différentes périodes')
+    plt.ylabel(metric)
+    plt.xlabel('Période')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.legend(title='Schéma de pondération')
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    
+    plt.savefig(f'comparison_{metric}.png')
+    plt.show()
+
+if __name__ == "__main__":
+    schemes = ['VW_cap', 'EW', 'VW']
+    
+    # Exécuter l'analyse sur les données les plus récentes
+    print("Analyse sur les données les plus récentes (1993-2024):")
+    extension_latest_data(schemes)
+    
+    # Définir les périodes de crise
+    crisis_periods = {
+        'Subprimes': ('2007-01-31', '2009-06-30'),
+        'COVID': ('2020-01-31', '2020-12-31'),
+        'Crise 2022': ('2022-01-31', '2022-12-31')
+    }
+    
+    # Analyse sur les données de base
+    base_results, base_summary, base_table = extension_base_data(schemes)
+    base_summary['Crisis'] = 'Base'
+    
+    print("Analyse sur les données de base (1993-2021):")
+    print(base_summary)
+    
+    # Analyse sur les périodes de crise
+    crisis_summaries = []
+    
+    for crisis_name, (start_date, end_date) in crisis_periods.items():
+        print(f"\nAnalyse pour la période de {crisis_name} ({start_date} à {end_date}):")
+        _, summary_df, _ = extension_crisis_data(schemes, crisis_name, start_date, end_date)
+        print(summary_df)
+        crisis_summaries.append(summary_df)
+    
+    # Comparer toutes les périodes
+    comparison_df = compare_periods(base_summary, crisis_summaries)
+    
+    # Visualiser les comparaisons pour quelques métriques
+    plot_comparison(comparison_df, 'Sharpe')
+    plot_comparison(comparison_df, 'Mean')
+    plot_comparison(comparison_df, 'Std')

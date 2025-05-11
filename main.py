@@ -53,7 +53,7 @@ def main(weighting_schemes : list, start_date : str, end_date : str):
     plt.show()
 
     # Créer le graphique des alphas (similaire à l'Exhibit 4) pour chaque schéma
-    for scheme in weighting_schemes:
+    """for scheme in weighting_schemes:
         # Attribuer les clusters à tous les facteurs
         factor_clusters = {factor: get_cluster(factor) for factor in factors_df_dict[scheme].columns}
         
@@ -64,7 +64,7 @@ def main(weighting_schemes : list, start_date : str, end_date : str):
             factor_clusters,
             market_return_dict[scheme]
         )
-        plt.show()
+        plt.show()"""
     
     return results_dict, summary_df, factor_table
 

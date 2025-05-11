@@ -563,7 +563,7 @@ traditional_factors = ['cop_at', 'noa_gr1a', 'saleq_gr1', 'ival_me', 'resff3_12_
 ml_top_factors = ensemble_results['consensus_ranking'].head(5)['factor'].tolist()
 
 comparison, _ = ml_selector.compare_with_traditional(
-    traditional_factors, 
+    traditional_factors,
     ml_top_factors
 )
 

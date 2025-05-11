@@ -4,9 +4,26 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f40efd86-fbd2-4ad3-81ba-10e6dc8db54c" name="Changes" comment="Refactor data loading: use the most complete CSV versions with filtering">
-      <change beforePath="$PROJECT_DIR$/factor_zoo.py" beforeDir="false" afterPath="$PROJECT_DIR$/factor_zoo.py" afterDir="false" />
+    <list default="true" id="f40efd86-fbd2-4ad3-81ba-10e6dc8db54c" name="Changes" comment="Exhibit tables and graphs">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ExtensionML.py" beforeDir="false" afterPath="$PROJECT_DIR$/extensions/ExtensionML.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ExtensionTemporelleAvancee.py" beforeDir="false" afterPath="$PROJECT_DIR$/extensions/ExtensionTemporelleAvancee.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/exhibit.py" beforeDir="false" afterPath="$PROJECT_DIR$/exhibit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/extension_ACP.py" beforeDir="false" afterPath="$PROJECT_DIR$/extensions/extension_ACP.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/extension_ACP_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/extensions/extension_ACP_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/extensions_analyse_temporelle" beforeDir="false" afterPath="$PROJECT_DIR$/extensions/extensions_analyse_temporelle.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/result_temporal_avancee/temporal_adaptive_selection.csv" beforeDir="false" afterPath="$PROJECT_DIR$/extensions/result_temporal_avancee/temporal_adaptive_selection.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/result_temporal_avancee/temporal_adaptive_selection.png" beforeDir="false" afterPath="$PROJECT_DIR$/extensions/result_temporal_avancee/temporal_adaptive_selection.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/result_temporal_avancee/temporal_stability.csv" beforeDir="false" afterPath="$PROJECT_DIR$/extensions/result_temporal_avancee/temporal_stability.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/result_temporal_avancee/temporal_stability.png" beforeDir="false" afterPath="$PROJECT_DIR$/extensions/result_temporal_avancee/temporal_stability.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/results_pca/comparison.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/results_pca/dendrogram.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/results_pca/evaluation.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/results_pca/loadings.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/results_pca/scree_plot.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_factor_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_factor_analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_temporal_extension.py" beforeDir="false" afterPath="$PROJECT_DIR$/extensions/run_temporal_extension.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,6 +55,9 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Python.ExtensionML.executor": "Debug",
+    "Python.exhibit.executor": "Debug",
+    "Python.extension_ACP.executor": "Debug",
     "Python.factor_zoo.executor": "Debug",
     "Python.main.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -49,10 +69,25 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "settings.editor.selected.configurable": "vcs.Git",
     "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
+      "Python"
+    ]
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/../Factor Zoo Zip.extensions" />
+      <recent name="$PROJECT_DIR$/extensions" />
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="Factor Zoo Zip" />
@@ -97,6 +132,7 @@
       <updated>1746868794601</updated>
       <workItem from="1746868796482" duration="2856000" />
       <workItem from="1746871770366" duration="5989000" />
+      <workItem from="1746955567852" duration="12398000" />
     </task>
     <task id="LOCAL-00001" summary="Refactor data loading: use the most complete CSV versions with filtering">
       <option name="closed" value="true" />
@@ -138,7 +174,23 @@
       <option name="project" value="LOCAL" />
       <updated>1746871895059</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="IterativeFactorSelection modified">
+      <option name="closed" value="true" />
+      <created>1746960285192</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1746960285192</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Exhibit tables and graphs">
+      <option name="closed" value="true" />
+      <created>1746971320218</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1746971320218</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -157,26 +209,61 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Refactor data loading: use the most complete CSV versions with filtering" />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactor data loading: use the most complete CSV versions with filtering" />
+    <MESSAGE value="IterativeFactorSelection modified" />
+    <MESSAGE value="Exhibit tables and graphs" />
+    <option name="LAST_COMMIT_MESSAGE" value="Exhibit tables and graphs" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/factor_zoo.py</url>
-          <line>358</line>
-          <option name="timeStamp" value="8" />
+          <url>file://$PROJECT_DIR$/main.py</url>
+          <line>36</line>
+          <option name="timeStamp" value="11" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/extensions/extension_ACP.py</url>
+          <line>70</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/extensions/extension_ACP.py</url>
+          <line>634</line>
+          <option name="timeStamp" value="24" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/extensions/extension_ACP.py</url>
+          <line>169</line>
+          <option name="timeStamp" value="26" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/main.py</url>
-          <line>39</line>
-          <option name="timeStamp" value="9" />
+          <line>35</line>
+          <option name="timeStamp" value="30" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/exhibit.py</url>
+          <line>462</line>
+          <option name="timeStamp" value="31" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/exhibit.py</url>
+          <line>324</line>
+          <option name="timeStamp" value="32" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/exhibit.py</url>
+          <line>373</line>
+          <option name="timeStamp" value="33" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Factor_Zoo_Zip$factor_zoo.coverage" NAME="factor_zoo Coverage Results" MODIFIED="1746876327541" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Factor_Zoo_Zip$main.coverage" NAME="main Coverage Results" MODIFIED="1746877748000" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/Factor_Zoo_Zip$extension_ACP.coverage" NAME="extension_ACP Coverage Results" MODIFIED="1746967255353" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Factor_Zoo_Zip$main.coverage" NAME="main Coverage Results" MODIFIED="1746974654453" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Factor_Zoo_Zip$ExtensionML.coverage" NAME="ExtensionML Coverage Results" MODIFIED="1746957135920" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Factor_Zoo_Zip$exhibit.coverage" NAME="exhibit Coverage Results" MODIFIED="1746974869705" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

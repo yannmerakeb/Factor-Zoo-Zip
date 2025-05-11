@@ -6,12 +6,11 @@ Script principal pour exécuter l'analyse des facteurs avec PCA/ACP
 """
 
 import os
-import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
 
 # Import des modules nécessaires
-from extension_ACP_main import main_pca_extension
+from extensions.extension_ACP_main import main_pca_extension
 
 # Configuration des paramètres
 CONFIG = {

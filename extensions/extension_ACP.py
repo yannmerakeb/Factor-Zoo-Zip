@@ -632,7 +632,7 @@ if __name__ == "__main__":
     print(f"Variance expliquée totale: {pca_results['cum_explained_variance'][-1]:.4f}")
 
     # Créer un dossier pour les résultats
-    output_dir = "results_pca"
+    output_dir = "../../Factor Zoo Zip.extensions/results_pca"
     os.makedirs(output_dir, exist_ok=True)
 
     # Dictionnaire des figures à sauvegarder

@@ -24,7 +24,7 @@ def main(weighting_schemes : list):
 
         # Charger les données
         data_loader = DataLoader(scheme, '1993-08-01', '2021-12-31')
-        factors_df, market_return = data_loader.load_factor_data('US')
+        factors_df, market_return = data_loader.load_factor_data('world')
 
         # Stocker pour utilisation ultérieure
         factors_df_dict[scheme] = factors_df
@@ -54,7 +54,7 @@ def main(weighting_schemes : list):
     plt.show()
 
     # Créer le graphique des alphas (similaire à l'Exhibit 4) pour chaque schéma
-    """for scheme in weighting_schemes:
+    for scheme in weighting_schemes:
         # Attribuer les clusters à tous les facteurs
         factor_clusters = {factor: get_cluster(factor) for factor in factors_df_dict[scheme].columns}
         
@@ -65,7 +65,7 @@ def main(weighting_schemes : list):
             factor_clusters,
             market_return_dict[scheme]
         )
-        plt.show()"""
+        plt.show()
     
     return results_dict, summary_df, factor_table
 

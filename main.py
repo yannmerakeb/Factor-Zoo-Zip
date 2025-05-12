@@ -7,7 +7,7 @@ from factor_selection import IterativeFactorSelection
 from clusters import create_factor_clusters
 from visualisation import FactorZooPlotter
 
-def main(weighting_schemes : list):
+def main(weighting_schemes : list, start_date : str = '1993-08-01', end_date : str = '2021-12-31', region : str = 'world'):
 
     results_dict = {}
 
@@ -23,8 +23,8 @@ def main(weighting_schemes : list):
         print(f"\nTraitement du schéma de pondération: {scheme}")
 
         # Charger les données
-        data_loader = DataLoader(scheme, '1993-08-01', '2021-12-31')
-        factors_df, market_return = data_loader.load_factor_data('world')
+        data_loader = DataLoader(scheme, start_date, end_date)
+        factors_df, market_return = data_loader.load_factor_data(region)
 
         # Stocker pour utilisation ultérieure
         factors_df_dict[scheme] = factors_df

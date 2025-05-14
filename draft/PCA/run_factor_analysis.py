@@ -10,7 +10,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # Import des modules nécessaires
-from extensions.PCA.extension_ACP_main import main_pca_extension
+from draft.PCA.extension_ACP_main import main_pca_extension
 
 # Configuration des paramètres
 CONFIG = {

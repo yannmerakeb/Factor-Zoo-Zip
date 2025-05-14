@@ -154,5 +154,6 @@ def run_analysis():
 
 if __name__ == "__main__":
     results = run_analysis()
+    results.to_csv('global_factor_analysis.csv', index=False)
     print("\nRésultats finaux :")
     print(results.to_string())

@@ -218,9 +218,9 @@ class IterativeFactorSelection:
             print(f"GRS statistic: {grs_stat:.3f}, p-value: {grs_pval:.3f}")
 
             # Arrêter si plus de facteurs significatifs
-            if n_significant_t3 == 0:
+            '''if n_significant_t3 == 0:
                 print(f"\nArrêt à l'itération {iteration + 1}: Plus de facteurs significatifs avec t > 3.0")
-                break
+                break'''
 
         self.results = pd.DataFrame(results)
 
